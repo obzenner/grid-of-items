@@ -8,6 +8,7 @@ const DATA_URL = 'https://tretton37.com/meet';
 const parseHtmlDocument = (html: string) => {
     let ninjas = [];
 
+    // use Cheerio to parse things in the html from Puppeteer
     $('div .ninja-summary', html).each((i, item) => {
         const flagAndCity = $(item).find('span').first().text();
         const name = $(item).find('a').contents().first().text();
@@ -27,6 +28,7 @@ const parseHtmlDocument = (html: string) => {
 const get37Content = async (dataUrl: string) => {
     const outputPath = `${path.resolve()}/ninjasData`;
 
+    // don't run the heavy async calls if the file is already generated
     if (fs.existsSync(`${outputPath}/ninjasData.json`)) {
         return;
     }
@@ -50,6 +52,7 @@ const get37Content = async (dataUrl: string) => {
     
         return ninjas;
     }
+    // TODO: add error handling
     finally {
         await browser.close();
     }
