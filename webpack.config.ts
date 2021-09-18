@@ -55,7 +55,7 @@ module.exports = [
                 excludeChunks: ["server"],
             }),
             new TSLintPlugin({
-                files: ["**.ts"],
+                files: ["./src/**/*.ts"],
             }),
         ],
         module: {
