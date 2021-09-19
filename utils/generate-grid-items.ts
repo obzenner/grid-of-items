@@ -8,7 +8,8 @@ const DATA_URL: string = 'https://tretton37.com/meet';
 export type Ninja = {
     name: string,
     flagAndCity: string,
-    avatar: string
+    avatar: string,
+    visible?: boolean
 }
 
 export type Ninjas = {

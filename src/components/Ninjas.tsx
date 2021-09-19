@@ -1,10 +1,37 @@
 import * as React from "react";
 import styled from 'styled-components';
-import { sortBy } from 'lodash';
+import { sortBy, filter } from 'lodash';
 
 import type { Ninjas, Ninja } from '../../utils/generate-grid-items';
 import { useInView } from 'react-intersection-observer';
-import { EDQUOT } from "constants";
+
+// Sort and filter functions: TODO => Sort and filter functions: Move to folders and write tests
+const sortByParam = (data: Ninja[] | null, sortParam: string) => {
+  return sortBy(data, sortParam);
+}
+
+// TODO: Improve performance
+const filterNinjas = (data: Ninja[] | null, filterValues: { [key: string]: string }, filterParams: string[]) => {
+  return data.reduce((acc, ninja) => {
+    // go through the sort params, check if they match and write result to accumulator
+    const isAMatch = filterParams.reduce((match, param) => {
+      const validator = ninja[param].toLowerCase().includes(filterValues[param].toLowerCase());
+      match = [...match, validator];
+      return match;
+    }, []);
+
+    // if all values in accumulator add up to boolean, set the "visible" attribute to true
+    ninja.visible = isAMatch.every(v => Boolean(v));
+
+    return [...acc, ninja];
+  }, []);
+}
+
+const MenuWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+`;
 
 const NinjasWrapper = styled.div`
   display: flex;
@@ -62,6 +89,15 @@ const SortButton = styled.button`
   cursor: pointer;
 `;
 
+const FilterLabel = styled.label`
+  margin: 0 5px;
+
+  input[type="text"] {
+    margin-left: 4px;
+    border-radius: 4px;
+  }
+`;
+
 type AvatarWrapperProps = {
   isAvatarVisible: boolean
 }
@@ -78,7 +114,7 @@ const NinjaBox = (props: { ninja: Ninja }) => {
 
   const { name, flagAndCity, avatar } = props.ninja;
 
-  return (<NinjaWrapper ref={ref}>
+  return (props.ninja.visible && <NinjaWrapper ref={ref}>
     <NinjaContentWrapper>
       <NinjaAvatar>
         {inView && <AvatarWrapper isAvatarVisible={isAvatarVisible} onLoad={() => {
@@ -91,36 +127,61 @@ const NinjaBox = (props: { ninja: Ninja }) => {
   </NinjaWrapper>)
 }
 
-const sortByParam= (data: Ninja[] | null, sortParam: string) => {
-  return sortBy(data, sortParam);
-}
-
 // Ninja List
 const NinjasList = (props: { data?: Ninjas }) => {
-  const [ninjas, setNinjas] = React.useState<Ninja[] | null>(props.data && props.data.ninjas || null);
-  const [isNameSorted, sortByName] = React.useState(true)
-  const [isLocationSorted, sortByLocation] = React.useState(false)
-
-  if (!props.data) {
-    return (<>{'No Ninjas Found'}</>);
+  if (!props.data || !props.data.ninjas) {
+    return (<h3>{'No Ninjas Found'}</h3>);
   }
-  return (<div>
-    <SortButton onClick={() => {
-      sortByName(!isNameSorted);
-      sortByLocation(isNameSorted);
-      setNinjas(sortByParam(ninjas, 'name'));
-    }}>Sort by name: {`${isNameSorted}`}</SortButton>
-    <SortButton onClick={() => {
-      sortByLocation(!isLocationSorted);
-      sortByName(isLocationSorted);
-      setNinjas(sortByParam(ninjas, 'flagAndCity'));
-    }}>Sort by location: {`${isLocationSorted}`}</SortButton>
+
+  // add visibility prop for filtering
+  const ninjasWithVisibility = (): Ninja[] => {
+    return props.data.ninjas.map(ninja => {
+      ninja.visible = true;
+      return ninja;
+    })
+  }
+
+  const [ninjas, setNinjas] = React.useState<Ninja[] | null>(ninjasWithVisibility || null);
+  const [nameFilterValue, setNameFilterValue] = React.useState('');
+  const [locationFilterValue, setLocationFilterValue] = React.useState('');
+
+  return (<>
+    <MenuWrapper>
+      <SortButton onClick={() => {
+        setNinjas(sortByParam(ninjas, 'flagAndCity'));
+      }}>Sort by location</SortButton>
+      <SortButton onClick={() => {
+        setNinjas(sortByParam(ninjas, 'name'));
+      }}>Sort by name</SortButton>
+      <FilterLabel>
+        Filter by name:
+        <input
+          type="text"
+          value={nameFilterValue}
+          onChange={async (event) => {
+            setNameFilterValue(event.target.value);
+            const filtered = filterNinjas(ninjas, {name: event.target.value, flagAndCity: locationFilterValue}, ['name', 'flagAndCity']);
+            setNinjas(filtered);
+          }} />
+      </FilterLabel>
+      <FilterLabel>
+        Filter by location:
+        <input
+          type="text"
+          value={locationFilterValue}
+          onChange={(event) => {
+            setLocationFilterValue(event.target.value);
+            const filtered = filterNinjas(ninjas, {name: nameFilterValue, flagAndCity: event.target.value}, ['name', 'flagAndCity']);
+            setNinjas(filtered);
+          }} />
+      </FilterLabel>
+    </MenuWrapper>
     <NinjasWrapper>
       {ninjas && ninjas.map(ninja => {
         return (<NinjaBox key={ninja.name} ninja={ninja} />)
       })}
     </NinjasWrapper>
-  </div>)
+  </>)
 
 }
 
