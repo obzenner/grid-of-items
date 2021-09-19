@@ -5,13 +5,13 @@ import $ from 'cheerio';
 
 const DATA_URL: string = 'https://tretton37.com/meet';
 
-type Ninja = {
+export type Ninja = {
     name: string,
     flagAndCity: string,
     avatar: string
 }
 
-type Ninjas = {
+export type Ninjas = {
     ninjas: Ninja[]
 }
 

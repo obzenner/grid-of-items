@@ -1,10 +1,15 @@
-import * as React from 'react';
-import ReactDOM from 'react-dom';
+import React from "react";
+import ReactDOM from "react-dom";
+import Ninjas from "./components/Ninjas";
 
-interface IndexProps { welcome: string };
+interface NinjasWindow extends Window {
+  INITIAL_DATA: any;
+}
 
-const Index = (props: IndexProps) => {
-  return <div>{props.welcome}</div>;
-};
+declare var window: NinjasWindow;
 
-ReactDOM.render(<Index welcome={'Hello world!'} />, document.getElementById('root'));
+
+ReactDOM.hydrate(
+  <Ninjas data={window.INITIAL_DATA} />,
+  document.getElementById("root")
+);

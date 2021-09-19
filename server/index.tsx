@@ -1,25 +1,39 @@
 import path from 'path';
-import express, { Request, Response, NextFunction } from 'express';
+import fs from 'fs';
+import express, { NextFunction, Request, Response } from 'express';
+
+// React
+import * as React from 'react';
+import Ninjas from '../src/components/Ninjas';
+import getNinjasData from '../ninjasData/getNinjasData';
+import { renderToString } from 'react-dom/server';
+import indexHtml from '../server/indexHtml';
 
 const app = express();
 const port = process.env.PORT || 3000;
-const DIST_DIR = path.join(__dirname, '../../dist/client');
-const HTML_FILE = path.join(DIST_DIR, 'index.html');
 
-interface MockProps { foo: string, bar: string }
-const mockResponse: MockProps = {
-    foo: 'bar',
-    bar: 'foo'
-};
+// app constants
+const CLIENT_STATIC_DIR = path.join(__dirname, '../client');
 
-app.use(express.static(DIST_DIR));
+app.use('/static', express.static(CLIENT_STATIC_DIR));
 
-app.get('/api', (req: Request, res: Response) => {
-    res.send(mockResponse);
+// Ninjas API for clients
+app.get('/api', async (req: Request, res: Response, next: NextFunction) => {
+    const ninjasData = getNinjasData();
+    if (ninjasData !== '{}') {
+        res.send(JSON.parse(ninjasData))
+    } else {
+        next('Data file is empty. Please generate fresh data!')
+    }
 });
 
 app.get('/', (req: Request, res: Response) => {
-    res.sendFile(HTML_FILE);
+    const ninjasData = getNinjasData();
+
+    const rootComponent = renderToString(<Ninjas data={JSON.parse(ninjasData)} />);
+    const html = indexHtml(rootComponent, ninjasData)
+
+    res.send(html);
 });
 
 app.listen(port, () => {

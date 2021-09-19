@@ -49,11 +49,6 @@ module.exports = [
         },
         target: "web",
         plugins: [
-            new HtmlWebPackPlugin({
-                template: "./src/index.html",
-                filename: "./index.html",
-                excludeChunks: ["server"],
-            }),
             new TSLintPlugin({
                 files: ["./src/**/*.ts"],
             }),
