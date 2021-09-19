@@ -81,7 +81,7 @@ const NinjasList = (props: { data?: Ninjas}) => {
     return (<>{'No Ninjas Found'}</>);
   }
   return (<NinjasWrapper>{props.data && props.data.ninjas.map(ninja => {
-    return (<TrackVisibility key={ninja.name} once offset={500}>
+    return (<TrackVisibility key={ninja.name} partialVisibility once offset={500}>
       <NinjaBox ninja={ninja} />
     </TrackVisibility>)
   }
