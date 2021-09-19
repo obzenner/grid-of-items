@@ -3,9 +3,19 @@ import path from 'path';
 import puppeteer, { Browser } from 'puppeteer';
 import $ from 'cheerio';
 
-const DATA_URL = 'https://tretton37.com/meet';
+const DATA_URL: string = 'https://tretton37.com/meet';
 
-const parseHtmlDocument = (html: string) => {
+type Ninja = {
+    name: string,
+    flagAndCity: string,
+    avatar: string
+}
+
+type Ninjas = {
+    ninjas: Ninja[]
+}
+
+const parseHtmlDocument = (html: string): Ninjas => {
     let ninjas = [];
 
     // use Cheerio to parse things in the html from Puppeteer
@@ -14,7 +24,7 @@ const parseHtmlDocument = (html: string) => {
         const name = $(item).find('a').contents().first().text();
         const avatar = $(item).find('img').attr('src');
 
-        const ninja = {
+        const ninja: Ninja = {
             name,
             flagAndCity,
             avatar
@@ -26,7 +36,7 @@ const parseHtmlDocument = (html: string) => {
 }
 
 const get37Content = async (dataUrl: string) => {
-    const outputPath = `${path.resolve()}/ninjasData`;
+    const outputPath: string = `${path.resolve()}/ninjasData`;
 
     // don't run the heavy async calls if the file is already generated
     if (fs.existsSync(`${outputPath}/ninjasData.json`)) {
