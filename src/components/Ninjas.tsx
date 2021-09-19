@@ -1,5 +1,5 @@
 import * as React from "react";
-import styled, { keyframes, css } from 'styled-components';
+import styled from 'styled-components';
 
 import type { Ninjas, Ninja } from '../../utils/generate-grid-items';
 import TrackVisibility from 'react-on-screen';
@@ -19,6 +19,7 @@ const NinjaWrapper = styled.div`
   margin: 5px;
   justify-content: center;
   border: 1px solid #efefef;
+  border-radius: 4px;
 `;
 
 
@@ -30,19 +31,24 @@ const NinjaContentWrapper = styled.div`
 
   h4, h5
    {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
     width: 100%;
-    min-height: 25px;
+    height: 35px;
     text-align: center;
   }
 `;
 
 const NinjaAvatar = styled.div`
   display: flex;
-  width: 90%;
+  width: 100%;
   height: 200px;
   overflow: hidden;
 
   img {
+    margin: auto;
     height: 100%;
   }
 `;
