@@ -4,6 +4,7 @@ import { sortBy } from 'lodash';
 
 import type { Ninjas, Ninja } from '../../utils/generate-grid-items';
 import { useInView } from 'react-intersection-observer';
+import { EDQUOT } from "constants";
 
 const NinjasWrapper = styled.div`
   display: flex;
@@ -54,6 +55,12 @@ const NinjaAvatar = styled.div`
   }
 `;
 
+const SortButton = styled.button`
+  background: none;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+`;
 
 type AvatarWrapperProps = {
   isAvatarVisible: boolean
@@ -98,16 +105,16 @@ const NinjasList = (props: { data?: Ninjas }) => {
     return (<>{'No Ninjas Found'}</>);
   }
   return (<div>
-    <button onClick={() => {
+    <SortButton onClick={() => {
       sortByName(!isNameSorted);
       sortByLocation(isNameSorted);
       setNinjas(sortByParam(ninjas, 'name'));
-    }}>Sort by name: {`${isNameSorted}`}</button>
-    <button onClick={() => {
+    }}>Sort by name: {`${isNameSorted}`}</SortButton>
+    <SortButton onClick={() => {
       sortByLocation(!isLocationSorted);
       sortByName(isLocationSorted);
       setNinjas(sortByParam(ninjas, 'flagAndCity'));
-    }}>Sort by location: {`${isLocationSorted}`}</button>
+    }}>Sort by location: {`${isLocationSorted}`}</SortButton>
     <NinjasWrapper>
       {ninjas && ninjas.map(ninja => {
         return (<NinjaBox key={ninja.name} ninja={ninja} />)
