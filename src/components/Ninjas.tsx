@@ -1,6 +1,6 @@
 import * as React from "react";
-import styled from 'styled-components';
-import { sortBy, filter } from 'lodash';
+import styled, { keyframes, css } from 'styled-components';
+import { sortBy } from 'lodash';
 
 import type { Ninjas, Ninja } from '../../utils/generate-grid-items';
 import { useInView } from 'react-intersection-observer';
@@ -27,6 +27,12 @@ const filterNinjas = (data: Ninja[] | null, filterValues: { [key: string]: strin
   }, []);
 }
 
+const Spin = keyframes`
+  100% { 
+    transform: rotateY(360deg); 
+  } 
+`;
+
 const MenuWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -41,7 +47,11 @@ const NinjasWrapper = styled.div`
   margin: auto;
 `;
 
-const NinjaWrapper = styled.div`
+type NinjaWrapperProps = {
+  triggerFlip: boolean
+}
+
+const NinjaWrapper = styled.div<NinjaWrapperProps>`
   display: flex;
   flex-wrap: wrap;
   width: 185px;
@@ -49,6 +59,10 @@ const NinjaWrapper = styled.div`
   justify-content: center;
   border: 1px solid #efefef;
   border-radius: 4px;
+
+  ${props => props.triggerFlip && css`
+    animation: ${Spin} 0.7s linear;
+  `}
 `;
 
 
@@ -105,20 +119,21 @@ type AvatarWrapperProps = {
 const AvatarWrapper = styled.img<AvatarWrapperProps>`
   opacity: ${props => props.isAvatarVisible ? '1' : '0'};
   transition: opacity 0.7s ease-in-out;
-
 `;
 
 const NinjaBox = (props: { ninja: Ninja }) => {
   const [isAvatarVisible, showAvatar] = React.useState(false);
+  const [triggerFlip, doTriggerFlip] = React.useState(false);
   const { ref, inView } = useInView({ trackVisibility: true, delay: 300, triggerOnce: true });
 
   const { name, flagAndCity, avatar } = props.ninja;
 
-  return (props.ninja.visible && <NinjaWrapper ref={ref}>
+  return (props.ninja.visible && <NinjaWrapper triggerFlip={triggerFlip} ref={ref}>
     <NinjaContentWrapper>
       <NinjaAvatar>
         {inView && <AvatarWrapper isAvatarVisible={isAvatarVisible} onLoad={() => {
           showAvatar(inView)
+          doTriggerFlip(inView)
         }} src={avatar} />}
       </NinjaAvatar>
       <h4>{inView && name}</h4>
