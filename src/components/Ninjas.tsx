@@ -1,129 +1,29 @@
 import * as React from "react";
-import styled, { keyframes, css } from 'styled-components';
-import { sortBy } from 'lodash';
+
+// Styles
+import {
+  MenuWrapper,
+  NinjaWrapper,
+  NinjasWrapper,
+  NinjaContentWrapper,
+  NinjaAvatar,
+  SortButton,
+  FilterLabel,
+  AvatarWrapper
+} from '../components/styled/NinjasStyled';
 
 import type { Ninjas, Ninja } from '../../utils/generate-grid-items';
 import { useInView } from 'react-intersection-observer';
 
-// Sort and filter functions: TODO => Sort and filter functions: Move to folders and write tests
-const sortByParam = (data: Ninja[] | null, sortParam: string) => {
-  return sortBy(data, sortParam);
-}
+import { sortByParam, filterNinjas } from '../helpers/NinjasHelpers';
 
-// TODO: Improve performance
-const filterNinjas = (data: Ninja[] | null, filterValues: { [key: string]: string }, filterParams: string[]) => {
-  return data.reduce((acc, ninja) => {
-    // go through the sort params, check if they match and write result to accumulator
-    const isAMatch = filterParams.reduce((match, param) => {
-      const validator = ninja[param].toLowerCase().includes(filterValues[param].toLowerCase());
-      match = [...match, validator];
-      return match;
-    }, []);
-
-    // if all values in accumulator add up to boolean, set the "visible" attribute to true
-    ninja.visible = isAMatch.every(v => Boolean(v));
-
-    return [...acc, ninja];
-  }, []);
-}
-
-const Spin = keyframes`
-  100% { 
-    transform: rotateY(360deg); 
-  } 
-`;
-
-const MenuWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
-`;
-
-const NinjasWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 800px;
-  margin: auto;
-`;
-
-type NinjaWrapperProps = {
-  triggerFlip: boolean
-}
-
-const NinjaWrapper = styled.div<NinjaWrapperProps>`
-  display: flex;
-  flex-wrap: wrap;
-  width: 185px;
-  margin: 5px;
-  justify-content: center;
-  border: 1px solid #efefef;
-  border-radius: 4px;
-
-  ${props => props.triggerFlip && css`
-    animation: ${Spin} 0.7s linear;
-  `}
-`;
-
-
-const NinjaContentWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  flex-wrap: wrap;
-  justify-content: center;
-
-  h4, h5
-   {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    width: 100%;
-    height: 35px;
-    text-align: center;
-  }
-`;
-
-const NinjaAvatar = styled.div`
-  display: flex;
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-
-  img {
-    margin: auto;
-    height: 100%;
-  }
-`;
-
-const SortButton = styled.button`
-  background: none;
-  margin: 0 4px;
-  border-radius: 4px;
-  cursor: pointer;
-`;
-
-const FilterLabel = styled.label`
-  margin: 0 5px;
-
-  input[type="text"] {
-    margin-left: 4px;
-    border-radius: 4px;
-  }
-`;
-
-type AvatarWrapperProps = {
-  isAvatarVisible: boolean
-}
-
-const AvatarWrapper = styled.img<AvatarWrapperProps>`
-  opacity: ${props => props.isAvatarVisible ? '1' : '0'};
-  transition: opacity 0.7s ease-in-out;
-`;
-
+// Individual Ninja card
 const NinjaBox = (props: { ninja: Ninja }) => {
   const [isAvatarVisible, showAvatar] = React.useState(false);
   const [triggerFlip, doTriggerFlip] = React.useState(false);
+
+  // intersection-observer to track ninjas visibility.
+  // TODO: Ninjas can be grouped in wrappers with several ninjas to avoid tracking every individual card.
   const { ref, inView } = useInView({ trackVisibility: true, delay: 300, triggerOnce: true });
 
   const { name, flagAndCity, avatar } = props.ninja;
@@ -133,6 +33,7 @@ const NinjaBox = (props: { ninja: Ninja }) => {
       <NinjaAvatar>
         {inView && <AvatarWrapper isAvatarVisible={isAvatarVisible} onLoad={() => {
           showAvatar(inView)
+          // flip animation :)
           doTriggerFlip(inView)
         }} src={avatar} />}
       </NinjaAvatar>
@@ -144,11 +45,14 @@ const NinjaBox = (props: { ninja: Ninja }) => {
 
 // Ninja List
 const NinjasList = (props: { data?: Ninjas }) => {
+  const FILTER_PARAMS = ['name', 'flagAndCity'];
+
   if (!props.data || !props.data.ninjas) {
     return (<h3>{'No Ninjas Found'}</h3>);
   }
 
-  // add visibility prop for filtering
+  // adds visibility prop that is used for filtering to maximize the use of React's virtual DOM
+  // TODO: This should live outside of this file. The app should recieve correct data right away.
   const ninjasWithVisibility = (): Ninja[] => {
     return props.data.ninjas.map(ninja => {
       ninja.visible = true;
@@ -156,10 +60,12 @@ const NinjasList = (props: { data?: Ninjas }) => {
     })
   }
 
+  // Hooks
   const [ninjas, setNinjas] = React.useState<Ninja[] | null>(ninjasWithVisibility || null);
   const [nameFilterValue, setNameFilterValue] = React.useState('');
   const [locationFilterValue, setLocationFilterValue] = React.useState('');
 
+  // Render
   return (<>
     <MenuWrapper>
       <SortButton onClick={() => {
@@ -175,8 +81,9 @@ const NinjasList = (props: { data?: Ninjas }) => {
           value={nameFilterValue}
           onChange={async (event) => {
             setNameFilterValue(event.target.value);
-            const filtered = filterNinjas(ninjas, {name: event.target.value, flagAndCity: locationFilterValue}, ['name', 'flagAndCity']);
-            setNinjas(filtered);
+            const filterValues = {name: event.target.value, flagAndCity: locationFilterValue}
+            const filteredNinjas = filterNinjas(ninjas, filterValues, FILTER_PARAMS);
+            setNinjas(filteredNinjas);
           }} />
       </FilterLabel>
       <FilterLabel>
@@ -186,8 +93,9 @@ const NinjasList = (props: { data?: Ninjas }) => {
           value={locationFilterValue}
           onChange={(event) => {
             setLocationFilterValue(event.target.value);
-            const filtered = filterNinjas(ninjas, {name: nameFilterValue, flagAndCity: event.target.value}, ['name', 'flagAndCity']);
-            setNinjas(filtered);
+            const filterValues = {name: nameFilterValue, flagAndCity: event.target.value};
+            const filteredNinjas = filterNinjas(ninjas, filterValues, FILTER_PARAMS);
+            setNinjas(filteredNinjas);
           }} />
       </FilterLabel>
     </MenuWrapper>
