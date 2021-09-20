@@ -9,7 +9,12 @@ const Spin = keyframes`
 const MenuWrapper = styled.div`
   display: flex;
   justify-content: center;
-  margin: 20px 0;
+  margin: 20px auto;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    max-width: 200px;
+  }
 `;
 
 const NinjasWrapper = styled.div`
@@ -80,13 +85,20 @@ const AvatarWrapper = styled.img<AvatarWrapperProps>`
 
 const SortButton = styled.button`
   background: none;
-  margin: 0 4px;
+  margin: 5px 4px;
   border-radius: 4px;
   cursor: pointer;
+  max-width: 200px;
 `;
 
 const FilterLabel = styled.label`
-  margin: 0 5px;
+  margin: 5px 5px;
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    max-width: 200px;
+  }
 
   input[type="text"] {
     margin-left: 4px;
