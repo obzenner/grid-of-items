@@ -12,10 +12,9 @@ jobs:
         node-version: [14.x, 15.x]
     
     steps:
-      - name: Checkout source Git repo
-        uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.3.4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-        run: npm test
+      - run: npm test
