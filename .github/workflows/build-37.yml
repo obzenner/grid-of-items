@@ -3,8 +3,8 @@ name: Master Build
 on: [push, pull_request]
 
 jobs:
-  build-service:
-    name: Master - Build MSP Service Container
+  build:
+    name: Master
     runs-on: ubuntu-latest
 
     strategy:
@@ -14,4 +14,8 @@ jobs:
     steps:
       - name: Checkout source Git repo
         uses: actions/checkout@v2.3.4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
         run: npm test
