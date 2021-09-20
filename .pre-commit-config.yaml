@@ -4,8 +4,3 @@ repos:
     hooks:
     -   id: no-commit-to-branch
         args: [--branch, master]
-    -   id: tests
-        name: tests
-        entry: 'yarn test'
-        language: system
-        files: \.ts$
