@@ -8,7 +8,6 @@ interface NinjasWindow extends Window {
 
 declare var window: NinjasWindow;
 
-
 ReactDOM.hydrate(
   <Ninjas data={window.INITIAL_DATA} />,
   document.getElementById("root")
