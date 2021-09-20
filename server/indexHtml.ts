@@ -1,7 +1,5 @@
 // Root index file for the application
 
-import type { Ninjas } from '../utils/generate-grid-items';
-
 export default (rootCompoment: string, data: string) => { 
     const html = `<!DOCTYPE html>
     <html lang="en">
